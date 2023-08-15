@@ -32,6 +32,7 @@
 
 #include <memory>
 
+#include "google/protobuf/compiler/rust/accessors/accessor_generator.h"
 #include "google/protobuf/compiler/rust/context.h"
 #include "google/protobuf/descriptor.h"
 #include "google/protobuf/descriptor.pb.h"
@@ -40,12 +41,19 @@ namespace google {
 namespace protobuf {
 namespace compiler {
 namespace rust {
-std::unique_ptr<AccessorGenerator> AccessorGenerator::For(
+
+namespace {
+
+std::unique_ptr<AccessorGenerator> AccessorGeneratorFor(
     Context<FieldDescriptor> field) {
   // We do not support [ctype=FOO] (used to set the field type in C++ to
   // cord or string_piece) in V0 API.
   if (field.desc().options().has_ctype()) {
-    return nullptr;
+    return std::make_unique<UnsupportedField>();
+  }
+
+  if (field.desc().is_repeated()) {
+    return std::make_unique<UnsupportedField>();
   }
 
   switch (field.desc().type()) {
@@ -62,19 +70,31 @@ std::unique_ptr<AccessorGenerator> AccessorGenerator::For(
     case FieldDescriptor::TYPE_FLOAT:
     case FieldDescriptor::TYPE_DOUBLE:
     case FieldDescriptor::TYPE_BOOL:
-      if (field.desc().is_repeated()) return nullptr;
-      return ForSingularScalar(field);
+      return std::make_unique<SingularScalar>();
     case FieldDescriptor::TYPE_BYTES:
-      if (field.desc().is_repeated()) return nullptr;
-      return ForSingularBytes(field);
+      return std::make_unique<SingularBytes>();
     case FieldDescriptor::TYPE_MESSAGE:
-      if (field.desc().is_repeated()) return nullptr;
-      return ForSingularMessage(field);
+      return std::make_unique<SingularMessage>();
 
     default:
-      return nullptr;
+      return std::make_unique<UnsupportedField>();
   }
 }
+
+}  // namespace
+
+void GenerateAccessorMsgImpl(Context<FieldDescriptor> field) {
+  AccessorGeneratorFor(field)->GenerateMsgImpl(field);
+}
+
+void GenerateAccessorExternC(Context<FieldDescriptor> field) {
+  AccessorGeneratorFor(field)->GenerateExternC(field);
+}
+
+void GenerateAccessorThunkCc(Context<FieldDescriptor> field) {
+  AccessorGeneratorFor(field)->GenerateThunkCc(field);
+}
+
 }  // namespace rust
 }  // namespace compiler
 }  // namespace protobuf
