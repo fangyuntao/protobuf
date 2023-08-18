@@ -376,6 +376,14 @@ Version::~Version() {
   _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
+Version* Version::InternalNew(
+    ::google::protobuf::Arena* arena, ::google::protobuf::MessageLite::NewOp op) const {
+  Version* msg = CreateMaybeMessage<Version>(arena);
+  if (op == ::google::protobuf::MessageLite::NewOp::kCopy) {
+    msg->MergeFrom(*this);
+  }
+  return msg;
+}
 inline void Version::SharedDtor() {
   ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.suffix_.Destroy();
@@ -691,6 +699,14 @@ CodeGeneratorRequest::~CodeGeneratorRequest() {
   // @@protoc_insertion_point(destructor:google.protobuf.compiler.CodeGeneratorRequest)
   _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
+}
+CodeGeneratorRequest* CodeGeneratorRequest::InternalNew(
+    ::google::protobuf::Arena* arena, ::google::protobuf::MessageLite::NewOp op) const {
+  CodeGeneratorRequest* msg = CreateMaybeMessage<CodeGeneratorRequest>(arena);
+  if (op == ::google::protobuf::MessageLite::NewOp::kCopy) {
+    msg->MergeFrom(*this);
+  }
+  return msg;
 }
 inline void CodeGeneratorRequest::SharedDtor() {
   ABSL_DCHECK(GetArenaForAllocation() == nullptr);
@@ -1067,6 +1083,14 @@ CodeGeneratorResponse_File::~CodeGeneratorResponse_File() {
   _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
+CodeGeneratorResponse_File* CodeGeneratorResponse_File::InternalNew(
+    ::google::protobuf::Arena* arena, ::google::protobuf::MessageLite::NewOp op) const {
+  CodeGeneratorResponse_File* msg = CreateMaybeMessage<CodeGeneratorResponse_File>(arena);
+  if (op == ::google::protobuf::MessageLite::NewOp::kCopy) {
+    msg->MergeFrom(*this);
+  }
+  return msg;
+}
 inline void CodeGeneratorResponse_File::SharedDtor() {
   ABSL_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.name_.Destroy();
@@ -1378,6 +1402,14 @@ CodeGeneratorResponse::~CodeGeneratorResponse() {
   // @@protoc_insertion_point(destructor:google.protobuf.compiler.CodeGeneratorResponse)
   _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
+}
+CodeGeneratorResponse* CodeGeneratorResponse::InternalNew(
+    ::google::protobuf::Arena* arena, ::google::protobuf::MessageLite::NewOp op) const {
+  CodeGeneratorResponse* msg = CreateMaybeMessage<CodeGeneratorResponse>(arena);
+  if (op == ::google::protobuf::MessageLite::NewOp::kCopy) {
+    msg->MergeFrom(*this);
+  }
+  return msg;
 }
 inline void CodeGeneratorResponse::SharedDtor() {
   ABSL_DCHECK(GetArenaForAllocation() == nullptr);

@@ -186,6 +186,14 @@ CppFeatures::~CppFeatures() {
   _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
+CppFeatures* CppFeatures::InternalNew(
+    ::google::protobuf::Arena* arena, ::google::protobuf::MessageLite::NewOp op) const {
+  CppFeatures* msg = CreateMaybeMessage<CppFeatures>(arena);
+  if (op == ::google::protobuf::MessageLite::NewOp::kCopy) {
+    msg->MergeFrom(*this);
+  }
+  return msg;
+}
 inline void CppFeatures::SharedDtor() {
   ABSL_DCHECK(GetArenaForAllocation() == nullptr);
 }

@@ -1477,8 +1477,9 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* p) {
       "\n"
       "// implements Message ----------------------------------------------\n"
       "\n"
-      "$classname$* New(::$proto_ns$::Arena* arena = nullptr) const final {\n"
-      "  return CreateMaybeMessage<$classname$>(arena);\n"
+      "$classname$* New(\n    ::$proto_ns$::Arena* arena = nullptr,\n    "
+      "::google::protobuf::MessageLite::NewOp op = ::google::protobuf::MessageLite::kNew) const {\n"
+      "  return InternalNew(arena, op);\n"
       "}\n");
 
   // For instances that derive from Message (rather than MessageLite), some
@@ -1567,6 +1568,11 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* p) {
       "static ::absl::string_view FullMessageName() {\n"
       "  return \"$full_name$\";\n"
       "}\n");
+
+  format(
+      "$classname$* InternalNew(\n"
+      "    ::$proto_ns$::Arena* arena,"
+      " ::google::protobuf::MessageLite::NewOp op) const final;\n");
 
   format(
       // TODO(gerbens) Make this private! Currently people are deriving from
@@ -2945,6 +2951,30 @@ void MessageGenerator::GenerateStructors(io::Printer* p) {
           }
         )cc");
   }
+
+  /*
+  p->Emit(R"cc(
+    $classname$* $classname$::New(::$proto_ns$::Arena* arena,
+                                  ::google::protobuf::MessageLite::NewOp op) const {
+      $classname$* msg = CreateMaybeMessage<$classname$>(arena);
+      if (op == ::google::protobuf::MessageLite::NewOp::kCopy) {
+        msg->MergeFrom(*this);
+      }
+      return msg;
+    }
+  )cc");
+  */
+
+  p->Emit(R"cc(
+    $classname$* $classname$::InternalNew(
+        ::$proto_ns$::Arena* arena, ::google::protobuf::MessageLite::NewOp op) const {
+      $classname$* msg = CreateMaybeMessage<$classname$>(arena);
+      if (op == ::google::protobuf::MessageLite::NewOp::kCopy) {
+        msg->MergeFrom(*this);
+      }
+      return msg;
+    }
+  )cc");
 
   // Generate the shared destructor code.
   GenerateSharedDestructorCode(p);
