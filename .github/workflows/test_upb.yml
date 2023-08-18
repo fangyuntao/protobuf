@@ -19,6 +19,7 @@ jobs:
         config:
           - { name: "Fastbuild" }
           - { name: "Optimized", flags: "-c opt" }
+          - { name: "GCC Optimized", flags: "-c opt", image: "us-docker.pkg.dev/protobuf-build/containers/test/linux/gcc:12.2-6.3.0-518b4fcd8d0ded2484c94f02e835526cacfdac2d" }
           - { name: "FastTable", flags: "--@upb//:fasttable_enabled=true" }
           - { name: "ASAN", flags: "--config=asan -c dbg", exclude-targets: "-@upb//benchmarks:benchmark -@upb//python/..." }
           - { name: "UBSAN", flags: "--config=ubsan -c dbg", exclude-targets: "-@upb//benchmarks:benchmark -@upb//python/... -@upb//lua/..." }
@@ -43,3 +44,31 @@ jobs:
           bazel-cache: upb-bazel
           bazel: test --cxxopt=-std=c++17 --host_cxxopt=-std=c++17 ${{ matrix.targets }} ${{ matrix.config.flags }}
           exclude-targets: ${{ matrix.config.exclude-targets }}
+
+  non-linux:
+    strategy:
+      fail-fast: false   # Don't cancel all jobs if one fails.
+      matrix:
+        config:
+          - { name: "Windows", os: windows-2019, startup-flags: "--output_user_root=C:/tmp", flags: "--cxxopt=/std:c++17 --host_cxxopt=/std:c++17", targets: "@upb//upb/... @upb//upbc/... @upb//python/... @upb//protos/... @upb//protos_generator/..." }
+          - { name: "macOS", os: macos-11 }
+          - { name: "macOS ARM (build only)", os: macos-11, bazel_cmd: "build", flags: "--cpu=darwin_arm64"}
+        include:
+          # Set defaults
+          - bazel_cmd: "test"
+          - flags: --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
+          - targets: "@upb//..."
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    steps:
+      - name: Checkout pending changes
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          ref: ${{ inputs.safe-checkout }}
+      - name: Run tests
+        uses: protocolbuffers/protobuf-ci/bazel@v2
+        with:
+          credentials: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+          bazel-cache: upb-bazel
+          bazel: ${{ matrix.config.startup-flags }} ${{ matrix.bazel_cmd }} ${{ matrix.flags }} ${{ matrix.targets }}
