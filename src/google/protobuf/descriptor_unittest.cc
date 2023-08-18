@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <limits>
 #include <memory>
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -83,6 +84,7 @@
 
 using ::testing::AnyOf;
 using ::testing::ElementsAre;
+using ::testing::HasSubstr;
 using ::testing::NotNull;
 
 namespace google {
@@ -612,6 +614,13 @@ TEST_F(FileDescriptorTest, DebugStringRoundTrip) {
     ASSERT_TRUE(descriptor != nullptr) << error_collector.last_error();
     EXPECT_EQ(content, descriptor->DebugString());
   }
+}
+
+TEST_F(FileDescriptorTest, AbslStringifyWorks) {
+  std::string s = absl::StrFormat(
+      "%v",
+      *protobuf_unittest::TestMessageWithCustomOptions::descriptor()->file());
+  EXPECT_THAT(s, HasSubstr("TestMessageWithCustomOptions"));
 }
 
 // ===================================================================
